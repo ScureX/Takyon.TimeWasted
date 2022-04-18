@@ -1,0 +1,30 @@
+{
+	"Name": "Takyon.TimeWasted",
+	"Description": "Tracks playtime",
+	"LoadPriority": 1,
+	"RequiredOnClient": false,
+	"Version": "0.0.1",
+	"ConVars": [
+		{
+			"Name": "tw_cfg_leaderboard_amount",
+			"DefaultValue": "8" // how many people should be displayed in the all-time leaderboard
+		},
+		{
+			"Name": "tw_loop_frequency",
+			"DefaultValue": "30" // after how many seconds times should be saved
+		}
+	],
+	"Scripts": [
+		{
+			"Path": "takyon_timewasted.nut",
+			"RunOn": "SERVER",
+			"ServerCallback": {
+				"After": "TimeWastedInit"
+			}
+		},
+		{
+			"Path": "takyon_timewasted_cfg.nut",
+			"RunOn": "SERVER"
+		}
+	]
+}
