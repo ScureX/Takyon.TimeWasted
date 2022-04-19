@@ -13,6 +13,7 @@ array<TW_PlayerData> tw_playerData = [] // data from current match
 void function TimeWastedInit(){
 	AddCallback_OnReceivedSayTextMessage(TW_ChatCallback)
 	AddCallback_OnPlayerRespawned(TW_OnPlayerSpawned)
+	AddCallback_GameStateEnter(eGameState.Postmatch, TW_Postmatch)
 
 	thread TimeWastedLoop()
 }
@@ -23,8 +24,11 @@ void function TimeWastedLoop(){
 			wait GetConVarInt("tw_loop_frequency")
 
 			foreach(entity player in GetPlayerArray()){
-				try{
-
+				foreach(TW_PlayerData pd in tw_playerData){
+					try{
+						if(player.GetUID() == pd.uid)
+							pd.minutesPlayed += GetConVarInt("tw_loop_frequency")*1.0/60
+					} catch(e){}
 				}
 			}
 
@@ -36,14 +40,14 @@ void function TimeWastedLoop(){
 void function TW_LeaderBoard(entity player){
 	TW_CfgInit() // load config
 
-	array<TW_PlayerData> TW_sortedConfig = tw_cfg_players // sort config in new array to not fuck with other shit
-	tw_sortedConfig.sort(RankMeSort)
-	Chat_ServerPrivateMessage(player, "\x1b[34m[TimeWasted] \x1b[38;2;0;220;30mTop Leaderboard \x1b[0m[" + tq_sortedConfig.len() + " Ranked since " + startDate "]", false)
+	array<TW_PlayerData> tw_sortedConfig = tw_cfg_players // sort config in new array to not fuck with other shit
+	tw_sortedConfig.sort(TimeWastedSort)
+	Chat_ServerPrivateMessage(player, "\x1b[34m[TimeWasted] \x1b[38;2;0;220;30mTop Leaderboard \x1b[0m[" + tw_sortedConfig.len() + " Ranked since " + startDate + "]", false)
 
 	int loopAmount = GetConVarInt("tw_cfg_leaderboard_amount") > tw_sortedConfig.len() ? tw_sortedConfig.len() : GetConVarInt("tw_cfg_leaderboard_amount")
 
 	for(int i = 0; i < loopAmount; i++){
-		Chat_ServerPrivateMessage(player, format("[%i] %s wasted [\x1b[38;2;0;220;30m%.2f \x1b[0mHours on this Server!", i+1, tw_sortedConfig[i].name, tw_sortedConfig[i].minutesPlayed/60, false)
+		Chat_ServerPrivateMessage(player, format("[%i] %s wasted [\x1b[38;2;0;220;30m%.2f \x1b[0mHours on this Server!", i+1, tw_sortedConfig[i].name, tw_sortedConfig[i].minutesPlayed/60), false)
 	}
 }
 
@@ -51,13 +55,11 @@ void function TW_Rank(entity player){
 	TW_CfgInit() // load config
 
 	array<TW_PlayerData> tw_sortedConfig = tw_cfg_players // sort config in new array to not fuck with other shit
-	tw_sortedConfig.sort(RankMeSort)
+	tw_sortedConfig.sort(TimeWastedSort)
 
 	for(int i = 0; i < tw_sortedConfig.len(); i++){
 		if(tw_sortedConfig[i].uid == player.GetUID()){
-			int deaths = tw_sortedConfig[i].deaths == 0 ? 1 : tw_sortedConfig[i].deaths // aboid division through 0
-			string kd = format("%.2f", tw_sortedConfig[i].kills*1.0/deaths*1.0)
-			Chat_ServerPrivateMessage(player, format("[%i/%i] %s wasted [\x1b[38;2;0;220;30m%.2f Hours on this Server!", i+1, tw_sortedConfig.len(), tw_sortedConfig[i].name, tw_sortedConfig[i].minutesPlayed, false)
+			Chat_ServerPrivateMessage(player, format("[%i/%i] %s wasted [\x1b[38;2;0;220;30m%.2f Hours on this Server!", i+1, tw_sortedConfig.len(), tw_sortedConfig[i].name, tw_sortedConfig[i].minutesPlayed/60), false)
 			break
 		}
 	}
@@ -87,7 +89,7 @@ ClServer_MessageStruct function TW_ChatCallback(ClServer_MessageStruct message) 
 		if(cmd == "topwasted"){
 			TW_LeaderBoard(message.player)
 		}
-		else if(cmd == "rankwasted"){
+		else if(cmd == "rankwasted" || cmd == "wasted"){
 			TW_Rank(message.player)
 		}
     }
@@ -152,7 +154,7 @@ void function TW_SaveConfig(){
  */
 
 void function TW_OnPlayerSpawned(entity player){
-	foreach(TW_PlayerData pd tw_playerData){ // check if in live data
+	foreach(TW_PlayerData pd in tw_playerData){ // check if in live data
 		try{
 			if(player.GetUID() == pd.uid){ // REM
 				return
@@ -176,4 +178,18 @@ void function TW_OnPlayerSpawned(entity player){
 	tmp.uid = player.GetUID() 
 	tmp.minutesPlayed = 0
 	tw_playerData.append(tmp)
+}
+
+void function TW_Postmatch(){
+	TW_SaveConfig()
+}
+
+/*
+ *	HELPER FUNCTIONS
+ */
+
+int function TimeWastedSort(TW_PlayerData data1, TW_PlayerData data2){
+  if ( data1.minutesPlayed == data2.minutesPlayed )
+    return 0
+  return data1.minutesPlayed < data2.minutesPlayed ? 1 : -1
 }
