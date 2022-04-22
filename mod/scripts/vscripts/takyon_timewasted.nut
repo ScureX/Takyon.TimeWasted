@@ -47,7 +47,7 @@ void function TW_LeaderBoard(entity player){
 	int loopAmount = GetConVarInt("tw_cfg_leaderboard_amount") > tw_sortedConfig.len() ? tw_sortedConfig.len() : GetConVarInt("tw_cfg_leaderboard_amount")
 
 	for(int i = 0; i < loopAmount; i++){
-		Chat_ServerPrivateMessage(player, format("[%i] %s wasted [\x1b[38;2;0;220;30m%.2f \x1b[0mHours on this Server!", i+1, tw_sortedConfig[i].name, tw_sortedConfig[i].minutesPlayed/60), false)
+		Chat_ServerPrivateMessage(player, format("[%i] %s wasted \x1b[38;2;0;220;30m%.2f \x1b[0mHours on this Server!", i+1, tw_sortedConfig[i].name, tw_sortedConfig[i].minutesPlayed/60), false)
 	}
 }
 
@@ -59,10 +59,23 @@ void function TW_Rank(entity player){
 
 	for(int i = 0; i < tw_sortedConfig.len(); i++){
 		if(tw_sortedConfig[i].uid == player.GetUID()){
-			Chat_ServerPrivateMessage(player, format("[%i/%i] %s wasted [\x1b[38;2;0;220;30m%.2f Hours on this Server!", i+1, tw_sortedConfig.len(), tw_sortedConfig[i].name, tw_sortedConfig[i].minutesPlayed/60), false)
+			Chat_ServerPrivateMessage(player, format("[%i/%i] %s wasted \x1b[38;2;0;220;30m%.2f Hours on this Server!", i+1, tw_sortedConfig.len(), tw_sortedConfig[i].name, tw_sortedConfig[i].minutesPlayed/60), false)
 			break
 		}
 	}
+}
+
+void function TW_AllWastedTime(entity player){
+	TW_CfgInit() // load config
+
+	array<TW_PlayerData> tw_newConfig = tw_cfg_players 
+	float totalMinWasted = 0
+
+	foreach(TW_PlayerData pd in tw_newConfig){
+		totalMinWasted += pd.minutesPlayed
+	}
+
+	Chat_ServerPrivateMessage(player, format("%i players wasted \x1b[38;2;0;220;30m%.2f \x1b[0mHours on this Server!", tw_newConfig.len(), totalMinWasted/60), false)		
 }
 
 /*
@@ -86,11 +99,14 @@ ClServer_MessageStruct function TW_ChatCallback(ClServer_MessageStruct message) 
         }
 
         // command logic
-		if(cmd == "topwasted"){
+		if(cmd == "topwasted" || cmd == "toptime"){
 			TW_LeaderBoard(message.player)
 		}
-		else if(cmd == "rankwasted" || cmd == "wasted"){
+		else if(cmd == "rankwasted" || cmd == "ranktime"){
 			TW_Rank(message.player)
+		}
+		else if(cmd == "wasted"){
+			TW_AllWastedTime(message.player)
 		}
     }
     return message
@@ -146,7 +162,7 @@ void function TW_SaveConfig(){
     DevP4Checkout(path)
 	DevTextBufferDumpToFile(path)
 	DevP4Add(path)
-	print("[TimeWasted] Saving config at " + path)
+	//print("[TimeWasted] Saving config at " + path)
 }
 
 /*
