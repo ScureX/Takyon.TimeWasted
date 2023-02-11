@@ -21,10 +21,6 @@
 			"ServerCallback": {
 				"After": "TimeWastedInit"
 			}
-		},
-		{
-			"Path": "takyon_timewasted_cfg.nut",
-			"RunOn": "SERVER"
 		}
 	]
 }
