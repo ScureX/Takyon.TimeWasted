@@ -35,8 +35,6 @@ void function TimeWastedLoop(){
 					TW_SaveConfig(data, player)
 				} catch(e){}
 			}
-
-			
 		} catch(e){print("[TimeWasted] Couldnt complete loop: " + e)}
 	}
 }
@@ -150,26 +148,29 @@ ClServer_MessageStruct function TW_ChatCallback(ClServer_MessageStruct message) 
  */
 
 void function TW_SaveConfig(TW_PlayerData player_data, entity player){
-	// send post request to update
-	HttpRequest request;
-	request.method = HttpRequestMethod.POST;
-	request.url = "http://localhost:8080";
-	request.headers["t_uid"] <- [player.GetUID().tostring()];
-	request.contentType = "application/json; charset=utf-8"
-	request.body =  PlayerDataToJson(player, player_data)
+	print("[timewasted] [TW_SaveConfig]")
+	try{
+		// send post request to update
+		HttpRequest request;
+		request.method = HttpRequestMethod.POST;
+		request.url = "http://localhost:8080";
+		request.headers["t_uid"] <- [player.GetUID().tostring()];
+		request.contentType = "application/json; charset=utf-8"
+		request.body =  PlayerDataToJson(player, player_data)
 
-	void functionref( HttpRequestResponse ) onSuccess = void function ( HttpRequestResponse response ) : ( player )
-	{
-		FlagSet("TW_SavedConfig")
-	}
+		void functionref( HttpRequestResponse ) onSuccess = void function ( HttpRequestResponse response ) : ( player )
+		{
+			FlagSet("TW_SavedConfig")
+		}
 
-	void functionref( HttpRequestFailure ) onFailure = void function ( HttpRequestFailure failure ) : ( player )
-	{
-		Chat_ServerPrivateMessage(player, RM_SERVER_ERROR, false, false)
-		FlagSet("TW_SavedConfig")
-	}
+		void functionref( HttpRequestFailure ) onFailure = void function ( HttpRequestFailure failure ) : ( player )
+		{
+			Chat_ServerPrivateMessage(player, RM_SERVER_ERROR, false, false)
+			FlagSet("TW_SavedConfig")
+		}
 
-	NSHttpRequest( request, onSuccess, onFailure );
+		NSHttpRequest( request, onSuccess, onFailure );
+	} catch(e){print("[timewasted] [error] [TW_SaveConfig] " + e)}
 }
 
 /*
@@ -177,6 +178,7 @@ void function TW_SaveConfig(TW_PlayerData player_data, entity player){
  */
 
 void function GetPlayer(entity player, TW_PlayerData tmp){
+	print("[timewasted] [GetPlayer]")
 	HttpRequest request;
 	request.method = HttpRequestMethod.GET;
 	request.url = "http://localhost:8080";
@@ -213,6 +215,7 @@ void function GetPlayer(entity player, TW_PlayerData tmp){
 }
 
 string function PlayerDataToJson(entity player, TW_PlayerData player_data){
+	print("[timewas] [PlayerDataToJson]")
 	table tab_inner = {}
 	tab_inner[ "mod" ] <- "timewasted"
 	tab_inner[ "uid" ] <- player.GetUID()
