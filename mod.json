@@ -16,6 +16,10 @@
 	],
 	"Scripts": [
 		{
+			"Path": "takyon_timewasted_constants.nut",
+			"RunOn": "SERVER"
+		},
+		{
 			"Path": "takyon_timewasted.nut",
 			"RunOn": "SERVER",
 			"ServerCallback": {

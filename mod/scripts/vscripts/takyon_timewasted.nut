@@ -22,6 +22,9 @@ void function TimeWastedLoop(){
 			wait GetConVarInt("tw_loop_frequency")
 
 			foreach(entity player in GetPlayerArray()){
+				if(!IsValid(player))
+					continue
+
 				TW_PlayerData data
 				GetPlayer(player, data)
 
@@ -59,7 +62,7 @@ void function TW_LeaderBoard(entity player){
 
 	void functionref( HttpRequestFailure ) onFailure = void function ( HttpRequestFailure failure ) : ( player )
 	{
-		Chat_ServerPrivateMessage(player, RM_SERVER_ERROR, false, false)
+		Chat_ServerPrivateMessage(player, TW_SERVER_ERROR, false, false)
 	}
 
 	NSHttpRequest( request, onSuccess, onFailure );
@@ -81,7 +84,7 @@ void function TW_Rank(entity player){
 
 	void functionref( HttpRequestFailure ) onFailure = void function ( HttpRequestFailure failure ) : ( player )
 	{
-		Chat_ServerPrivateMessage(player, RM_SERVER_ERROR, false, false)
+		Chat_ServerPrivateMessage(player, TW_SERVER_ERROR, false, false)
 	}
 
 	NSHttpRequest( request, onSuccess, onFailure );
@@ -103,7 +106,7 @@ void function TW_AllWastedTime(entity player){
 
 	void functionref( HttpRequestFailure ) onFailure = void function ( HttpRequestFailure failure ) : ( player )
 	{
-		Chat_ServerPrivateMessage(player, RM_SERVER_ERROR, false, false)
+		Chat_ServerPrivateMessage(player, TW_SERVER_ERROR, false, false)
 	}
 
 	NSHttpRequest( request, onSuccess, onFailure );
@@ -158,15 +161,17 @@ void function TW_SaveConfig(TW_PlayerData player_data, entity player){
 		request.contentType = "application/json; charset=utf-8"
 		request.body =  PlayerDataToJson(player, player_data)
 
-		void functionref( HttpRequestResponse ) onSuccess = void function ( HttpRequestResponse response ) : ( player )
+		void functionref( HttpRequestResponse ) onSuccess = void function ( HttpRequestResponse response )
 		{
 			FlagSet("TW_SavedConfig")
 		}
 
 		void functionref( HttpRequestFailure ) onFailure = void function ( HttpRequestFailure failure ) : ( player )
 		{
-			Chat_ServerPrivateMessage(player, RM_SERVER_ERROR, false, false)
 			FlagSet("TW_SavedConfig")
+			if(!IsValid(player))
+				return
+			Chat_ServerPrivateMessage(player, TW_SERVER_ERROR, false, false)
 		}
 
 		NSHttpRequest( request, onSuccess, onFailure );
@@ -208,7 +213,7 @@ void function GetPlayer(entity player, TW_PlayerData tmp){
 
 	void functionref( HttpRequestFailure ) onFailure = void function ( HttpRequestFailure failure ) : ( player )
 	{
-		Chat_ServerPrivateMessage(player, RM_SERVER_ERROR, false, false)
+		Chat_ServerPrivateMessage(player, TW_SERVER_ERROR, false, false)
 	}
 	
 	NSHttpRequest( request, onSuccess, onFailure )

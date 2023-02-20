@@ -1,0 +1,1 @@
+global const string TW_SERVER_ERROR = "\x1b[34m[TimeWasted] \x1b[38;2;220;20;20mERROR: Server did not respond."
