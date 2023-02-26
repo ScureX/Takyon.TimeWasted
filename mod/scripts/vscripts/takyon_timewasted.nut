@@ -45,7 +45,7 @@ void function TimeWastedLoop(){
 void function TW_LeaderBoard(entity player){
 	HttpRequest request;
 	request.method = HttpRequestMethod.GET;
-	request.url = "http://localhost:8080";
+	request.url = "http://localhost:8882";
 	request.headers["t_querytype"] <- ["timewasted_leaderboard"];
 
 	entity player = player
@@ -71,7 +71,7 @@ void function TW_LeaderBoard(entity player){
 void function TW_Rank(entity player){
 	HttpRequest request;
 	request.method = HttpRequestMethod.GET;
-	request.url = "http://localhost:8080";
+	request.url = "http://localhost:8882";
 	request.headers["t_querytype"] <- ["timewasted_queryplayer"];
 	request.headers["t_uid"] <- [player.GetUID().tostring()];
 
@@ -93,7 +93,7 @@ void function TW_Rank(entity player){
 void function TW_AllWastedTime(entity player){
 	HttpRequest request;
 	request.method = HttpRequestMethod.GET;
-	request.url = "http://localhost:8080";
+	request.url = "http://localhost:8882";
 	request.headers["t_querytype"] <- ["timewasted_allwastedtime"];
 	request.headers["t_uid"] <- [player.GetUID().tostring()];
 
@@ -156,7 +156,7 @@ void function TW_SaveConfig(TW_PlayerData player_data, entity player){
 		// send post request to update
 		HttpRequest request;
 		request.method = HttpRequestMethod.POST;
-		request.url = "http://localhost:8080";
+		request.url = "http://localhost:8882";
 		request.headers["t_uid"] <- [player.GetUID().tostring()];
 		request.contentType = "application/json; charset=utf-8"
 		request.body =  PlayerDataToJson(player, player_data)
@@ -186,7 +186,7 @@ void function GetPlayer(entity player, TW_PlayerData tmp){
 	print("[timewasted] [GetPlayer]")
 	HttpRequest request;
 	request.method = HttpRequestMethod.GET;
-	request.url = "http://localhost:8080";
+	request.url = "http://localhost:8882";
 	request.headers["t_querytype"] <- ["timewasted_queryplayer"];
 	request.headers["t_returnraw"] <- ["true"];
 	request.headers["t_uid"] <- [player.GetUID().tostring()];
